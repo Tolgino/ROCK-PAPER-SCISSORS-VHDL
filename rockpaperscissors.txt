@@ -1,0 +1,155 @@
+----------------------------------------------------------------------------------
+-- Company: 
+-- Engineer: 
+-- 
+-- Create Date:    22:44:19 05/25/2018 
+-- Design Name: 
+-- Module Name:    Code - Behavioral 
+-- Project Name: 
+-- Target Devices: 
+-- Tool versions: 
+-- Description: 
+--
+-- Dependencies: 
+--
+-- Revision: 
+-- Revision 0.01 - File Created
+-- Additional Comments: 
+--
+----------------------------------------------------------------------------------
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+use IEEE.NUMERIC_STD.ALL;
+
+-- Uncomment the following library declaration if instantiating
+-- any Xilinx primitives in this code.
+library UNISIM;
+use UNISIM.VComponents.all;
+
+entity Code is
+
+Port
+	( switch : in std_logic_vector(2 downto 0);
+	A : out std_logic_vector(7 downto 0);
+	B: out std_logic_vector(7 downto 0);
+	  clock : in std_logic;
+	  clr : in std_logic;	
+	  reset_button : std_logic;
+		led : out std_logic_vector(2 downto 0);
+	  button : in std_logic
+	  );
+
+end Code;
+
+architecture Behavioral of Code is
+
+signal score : integer range 0 to 7 := 3;
+signal random : integer range 0 to 2;
+signal delay1 : std_logic;
+signal delay2 : std_logic;
+signal delay3 : std_logic;
+signal button_out : std_logic;
+signal button_out_delay : std_logic;
+signal output : std_logic_vector(2 downto 0);
+signal lock : std_logic;
+signal lock1 : std_logic;
+begin
+-- "10001000" -- 0
+-- "11101101" -- 1
+-- "10100010" -- 2
+-- "10100100" -- 3
+-- "11000101" -- 4
+-- "10010100" -- 5
+-- "10010000" -- 6
+-- "10101101" -- 7
+
+process(clock,clr)
+begin
+
+if clock'event and clock='1' then
+
+delay1<=button;
+delay2<=delay1;
+delay3<=delay2;
+
+random <= random + 1;
+button_out <= delay1 and delay2 and delay3;
+button_out_delay <= button_out;
+
+if switch = "001" then
+	if random = 0 then
+		output <= "010";
+	elsif random = 1 then
+		output <= "001";
+	else
+		output <= "100";
+	end if;
+elsif switch = "010" then
+	if random = 0 then
+		output <= "100";
+	elsif random = 1 then
+		output <= "010";
+	else
+		output <= "001";
+	end if;
+elsif switch = "100" then 
+	if random = 0 then
+		output <= "001";
+	elsif random = 1 then
+		output <= "100";
+	else
+		output <= "010";
+	end if;
+else 
+	output <= "111";
+end if;
+
+
+if (button_out and not button_out_delay) = '1' then
+	if output = "100" then
+			score <= score + 1;
+	elsif output = "001" then
+			score <= score - 1;
+	else 
+		score <= score;
+	end if;
+end if;
+
+
+if reset_button = '1' then
+	score <= 3;
+end if;
+
+if score = 0 then
+	B <= "11011010";
+elsif score = 1 then
+	B <= "11101101";
+elsif score = 2 then
+	B <= "10100010";
+elsif score = 3 then
+	B <= "10100100";
+elsif score = 4 then
+	B <= "11000101";
+elsif score = 5 then
+	B <= "10010100";
+elsif score = 6 then
+	B <= "10010000";
+elsif score = 7 then
+	B <= "11000000";
+end if;
+
+end if;
+
+end process;
+
+A <= "11111011";
+led(0) <= switch(0);
+led(1) <= switch(1);
+led(2) <= switch(2);
+
+end Behavioral;
+
+
